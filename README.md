@@ -14,27 +14,7 @@ and OpenFoodFacts integration to pull in real product data by barcode or name.
 - **Interactive menu** (`menu` command) plus scriptable CLI commands
 - **Tests**: 85 unit tests; external HTTP calls are mocked so the suite runs offline
 
-## Project structure
 
-```
-inventory-management/
-├── inventory/
-│   ├── app.py            # Flask app factory + all routes
-│   ├── openfoodfacts.py  # OpenFoodFacts client (normalizes responses, offline mock mode)
-│   ├── mock_data.py      # Mock OpenFoodFacts database array + seed prices/stock
-│   └── cli.py            # argparse CLI that calls the API
-├── tests/
-│   ├── test_api.py              # CRUD + helper routes
-│   ├── test_openfoodfacts.py    # external API client
-│   ├── test_external_routes.py  # external routes + import
-│   ├── test_mock_mode.py        # mock DB, offline mode, seeding, enrich
-│   └── test_cli.py              # CLI commands + interactive menu
-├── docs/
-│   ├── ROUTE_PLAN.md            # inputs/outputs/data changes/CLI triggers per route
-│   └── inventory.postman_collection.json
-├── requirements.txt
-└── README.md
-```
 
 ## Setup
 
@@ -60,50 +40,6 @@ OFF_USE_MOCK=1 python -m inventory.cli lookup --name almond
 
 ## Use the CLI
 
-Keep the server running in one terminal and use the CLI in another.
-
-```bash
-python -m inventory.cli add "Oat Milk" --brand Oatly --price 3.50 --stock 20
-python -m inventory.cli list
-python -m inventory.cli list --search oat
-python -m inventory.cli get 1
-python -m inventory.cli update 1 --stock 15 --price 3.75
-python -m inventory.cli delete 1
-python -m inventory.cli low-stock --threshold 10
-
-python -m inventory.cli enrich 3        # fill item 3's empty fields from the API
-python -m inventory.cli menu            # interactive menu
-
-# OpenFoodFacts
-python -m inventory.cli lookup --barcode 3017620422003
-python -m inventory.cli lookup --name "nutella"
-python -m inventory.cli import --barcode 3017620422003 --price 4.99 --stock 12
-python -m inventory.cli import --name "nutella" --price 4.99 --stock 12
-```
-
-If the API runs somewhere else, set `INVENTORY_API_URL`:
-
-```bash
-export INVENTORY_API_URL=http://localhost:8000
-```
-
-## API reference
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/health` | Health check |
-| GET | `/inventory` | List items (optional `?q=` filters name/brand) |
-| GET | `/inventory/<id>` | Get one item |
-| POST | `/inventory` | Create item (`name` required) |
-| PATCH | `/inventory/<id>` | Update any subset of fields |
-| DELETE | `/inventory/<id>` | Delete item |
-| GET | `/inventory/low-stock` | Items at or below `?threshold=` (default 5) |
-| GET | `/external/barcode/<barcode>` | Look up a product on OpenFoodFacts |
-| GET | `/external/search?name=` | Search OpenFoodFacts by name |
-| POST | `/inventory/import` | Fetch from OpenFoodFacts and add to inventory |
-| POST | `/inventory/<id>/enrich` | Fill an item's empty fields from OpenFoodFacts (by barcode) |
-
-Full inputs/outputs for every route: [docs/ROUTE_PLAN.md](docs/ROUTE_PLAN.md).
 
 **Item fields:** `id`, `name`, `brand`, `barcode`, `category`, `price`, `stock`,
 `ingredients`, `quantity_label`, `image_url`.
